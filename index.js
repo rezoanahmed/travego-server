@@ -4,7 +4,7 @@ const cors = require("cors");
 const port = process.env.PORT || 3000;
 require('dotenv').config()
 
-
+app.use(express.json());
 app.use(cors());
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = `mongodb+srv://${process.env.user}:${process.env.pass}@cluster0.lwhx9xs.mongodb.net/?retryWrites=true&w=majority`;
@@ -27,11 +27,19 @@ async function run() {
 
     const servicesCollection = client.db("TraveGo").collection("services");
     const destinationsCollection = client.db("TraveGo").collection("destinations");
+    const reviewsCollection = client.db("TraveGo").collection("reviews");
     // console.log(servicesCollection);
     // services
     app.get("/services", async(req,res)=>{
       const result = await servicesCollection.find().toArray();
       res.send(result);
+    })
+    app.post("/services", async(req,res)=>{
+      const service = req.body;
+      // console.log(data);
+      const result = await servicesCollection.insertOne(service)
+      res.send(result);
+
     })
 
 
@@ -40,6 +48,12 @@ async function run() {
     app.get("/destinations", async(req,res)=>{
       const result = await destinationsCollection.find().toArray();
       res.send(result);
+    })
+    // reviews
+    app.get("/reviews", async(req,res)=>{
+      const result = await reviewsCollection.find().toArray();
+      res.send(result);
+
     })
 
 
