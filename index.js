@@ -6,7 +6,7 @@ require('dotenv').config()
 
 app.use(express.json());
 app.use(cors());
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.user}:${process.env.pass}@cluster0.lwhx9xs.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -34,12 +34,38 @@ async function run() {
       const result = await servicesCollection.find().toArray();
       res.send(result);
     })
+
+    app.get("/service/:id", async(req,res)=>{
+      const id = req.params.id;
+      // console.log(id);
+      const query = {_id: new ObjectId(id)}
+      const result = await servicesCollection.findOne(query);
+      res.send(result);
+    })
+
     app.post("/services", async(req,res)=>{
       const service = req.body;
       // console.log(data);
       const result = await servicesCollection.insertOne(service)
       res.send(result);
 
+    })
+
+
+
+    // my services
+    app.get("/myservices", async(req,res)=>{
+      // const email = req.query.email;
+      let query = {};
+      if(req.query?.email){
+        query={
+          email:req.query.email,
+        }
+      }
+      const result = await servicesCollection.find(query).toArray();
+      res.send(result);
+      // console.log(email);
+      // res.send(email);
     })
 
 
