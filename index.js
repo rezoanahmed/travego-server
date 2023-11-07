@@ -28,6 +28,7 @@ async function run() {
     const servicesCollection = client.db("TraveGo").collection("services");
     const destinationsCollection = client.db("TraveGo").collection("destinations");
     const reviewsCollection = client.db("TraveGo").collection("reviews");
+    const bookingsCollection = client.db("TraveGo").collection("bookings");
     // console.log(servicesCollection);
     // services
     app.get("/services", async(req,res)=>{
@@ -73,6 +74,18 @@ async function run() {
       const query = {_id: new ObjectId(id)};
       const result = await servicesCollection.deleteOne(query);
       res.send(result);
+    })
+
+    // bookings
+    app.post("/bookings", async(req,res)=>{
+      const bookings = req.body;
+      // console.log(bookings);
+      const result = await bookingsCollection.insertOne(bookings);
+      res.send(result);
+    })
+    app.get("/bookings", async(req,res)=>{
+      const result = await bookingsCollection.find().toArray();
+      res.send(result)
     })
 
 
