@@ -52,6 +52,26 @@ async function run() {
 
     })
 
+    app.patch("/service/:id", async(req,res)=>{
+      const id = req.params.id;
+      const updateRequest = req.body;
+      // console.log(updateRequest);
+      const filter = {_id: new ObjectId(id)};
+      const options = {upsert: true}
+      const updatedService = {
+        $set:{
+          name: updateRequest.name,
+          price: updateRequest.price,
+          photo: updateRequest.photo,
+          location: updateRequest.location,
+          description: updateRequest.description,
+        }
+      }
+      const result = await servicesCollection.updateOne(filter, updatedService, options);
+      res.send(result);
+
+    })
+
 
 
     // my services
@@ -76,6 +96,8 @@ async function run() {
       res.send(result);
     })
 
+
+
     // bookings
     app.post("/bookings", async(req,res)=>{
       const bookings = req.body;
@@ -92,6 +114,25 @@ async function run() {
       }
       const result = await bookingsCollection.find(query).toArray();
       res.send(result)
+    })
+
+    app.delete("/bookings/:id",async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await bookingsCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    // schedules
+    app.get("/schedules", async(req,res)=>{
+        let query={};
+        if(req.query?.hostEmail){
+          query={
+            hostEmail: req.query.hostEmail,
+          }
+        }
+        const result = await bookingsCollection.find(query).toArray();
+        res.send(result);
     })
 
 
