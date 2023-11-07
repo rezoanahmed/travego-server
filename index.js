@@ -68,6 +68,13 @@ async function run() {
       // res.send(email);
     })
 
+    app.delete("/myservices/:id", async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await servicesCollection.deleteOne(query);
+      res.send(result);
+    })
+
 
 
     // destinations
