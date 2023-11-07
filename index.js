@@ -161,6 +161,21 @@ async function run() {
       res.send(result);
     })
 
+    app.patch("/schedules/:id", async(req,res)=>{
+      const id = req.params.id;
+      const updateRequest = req.body;
+      // console.log(updateRequest);
+      const filter = {_id: new ObjectId(id)};
+      const options = {upsert: true};
+      const updatedDoc = {
+        $set:{
+          status: updateRequest.status,
+        }
+      }
+      const result = await bookingsCollection.updateOne(filter, updatedDoc, options);
+      res.send(result);
+    })
+
 
 
     // destinations
