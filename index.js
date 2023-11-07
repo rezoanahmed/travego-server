@@ -31,20 +31,20 @@ async function run() {
     const bookingsCollection = client.db("TraveGo").collection("bookings");
     // console.log(servicesCollection);
     // services
-    app.get("/services", async(req,res)=>{
+    app.get("/services", async (req, res) => {
       const result = await servicesCollection.find().toArray();
       res.send(result);
     })
 
-    app.get("/service/:id", async(req,res)=>{
+    app.get("/service/:id", async (req, res) => {
       const id = req.params.id;
       // console.log(id);
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const result = await servicesCollection.findOne(query);
       res.send(result);
     })
 
-    app.post("/services", async(req,res)=>{
+    app.post("/services", async (req, res) => {
       const service = req.body;
       // console.log(data);
       const result = await servicesCollection.insertOne(service)
@@ -52,14 +52,14 @@ async function run() {
 
     })
 
-    app.patch("/service/:id", async(req,res)=>{
+    app.patch("/service/:id", async (req, res) => {
       const id = req.params.id;
       const updateRequest = req.body;
       // console.log(updateRequest);
-      const filter = {_id: new ObjectId(id)};
-      const options = {upsert: true}
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true }
       const updatedService = {
-        $set:{
+        $set: {
           name: updateRequest.name,
           price: updateRequest.price,
           photo: updateRequest.photo,
@@ -75,12 +75,12 @@ async function run() {
 
 
     // my services
-    app.get("/myservices", async(req,res)=>{
+    app.get("/myservices", async (req, res) => {
       // const email = req.query.email;
       let query = {};
-      if(req.query?.email){
-        query={
-          email:req.query.email,
+      if (req.query?.email) {
+        query = {
+          email: req.query.email,
         }
       }
       const result = await servicesCollection.find(query).toArray();
@@ -89,9 +89,9 @@ async function run() {
       // res.send(email);
     })
 
-    app.delete("/myservices/:id", async(req,res)=>{
+    app.delete("/myservices/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await servicesCollection.deleteOne(query);
       res.send(result);
     })
@@ -99,16 +99,16 @@ async function run() {
 
 
     // bookings
-    app.post("/bookings", async(req,res)=>{
+    app.post("/bookings", async (req, res) => {
       const bookings = req.body;
       // console.log(bookings);
       const result = await bookingsCollection.insertOne(bookings);
       res.send(result);
     })
-    app.get("/bookings", async(req,res)=>{
+    app.get("/bookings", async (req, res) => {
       let query = {}
-      if(req.query?.usermail){
-        query={
+      if (req.query?.usermail) {
+        query = {
           usermail: req.query.usermail
         }
       }
@@ -116,41 +116,60 @@ async function run() {
       res.send(result)
     })
 
-    app.get("/booking/:id",async(req,res)=>{
+    app.get("/booking/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await bookingsCollection.findOne(query);
       res.send(result);
     })
 
-    app.delete("/bookings/:id",async(req,res)=>{
+    app.delete("/bookings/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await bookingsCollection.deleteOne(query);
       res.send(result);
     })
 
-    // schedules
-    app.get("/schedules", async(req,res)=>{
-        let query={};
-        if(req.query?.hostEmail){
-          query={
-            hostEmail: req.query.hostEmail,
-          }
+    app.patch("/booking/:id", async (req, res) => {
+      const id = req.params.id;
+      const updateRequest = req.body;
+      // console.log(updateRequest);
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true }
+      const updatedService = {
+        $set: {
+          date: updateRequest.date,
+          instructions: updateRequest.instructions,
         }
-        const result = await bookingsCollection.find(query).toArray();
-        res.send(result);
+      }
+      const result = await bookingsCollection.updateOne(filter, updatedService, options);
+      res.send(result);
+
+    })
+
+
+
+    // schedules
+    app.get("/schedules", async (req, res) => {
+      let query = {};
+      if (req.query?.hostEmail) {
+        query = {
+          hostEmail: req.query.hostEmail,
+        }
+      }
+      const result = await bookingsCollection.find(query).toArray();
+      res.send(result);
     })
 
 
 
     // destinations
-    app.get("/destinations", async(req,res)=>{
+    app.get("/destinations", async (req, res) => {
       const result = await destinationsCollection.find().toArray();
       res.send(result);
     })
     // reviews
-    app.get("/reviews", async(req,res)=>{
+    app.get("/reviews", async (req, res) => {
       const result = await reviewsCollection.find().toArray();
       res.send(result);
 
@@ -170,12 +189,12 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get("/", (req,res)=>{
-    // console.log("Travego Server Is Running Successfully!!!");
-    res.send("Travego Server Is Running Successfully!!!")
+app.get("/", (req, res) => {
+  // console.log("Travego Server Is Running Successfully!!!");
+  res.send("Travego Server Is Running Successfully!!!")
 })
 
-app.listen(port, ()=>{
-    console.log(`server is running on port: ${port}`);
+app.listen(port, () => {
+  console.log(`server is running on port: ${port}`);
 })
 
