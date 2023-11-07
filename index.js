@@ -84,7 +84,13 @@ async function run() {
       res.send(result);
     })
     app.get("/bookings", async(req,res)=>{
-      const result = await bookingsCollection.find().toArray();
+      let query = {}
+      if(req.query?.usermail){
+        query={
+          usermail: req.query.usermail
+        }
+      }
+      const result = await bookingsCollection.find(query).toArray();
       res.send(result)
     })
 
