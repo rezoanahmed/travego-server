@@ -161,7 +161,13 @@ async function run() {
       const result = await bookingsCollection.insertOne(bookings);
       res.send(result);
     })
-    app.get("/bookings", async (req, res) => {
+    app.get("/bookings",verifyToken, async (req, res) => {
+      // console.log("from token",req.user.email);
+      // console.log("from query", req.query.usermail);
+      if(req.user?.email !== req.query?.usermail){
+        return res.status(403).send({message: "Forbidden"});
+          // console.log("hocche na");
+      }
       let query = {}
       if (req.query?.usermail) {
         query = {
