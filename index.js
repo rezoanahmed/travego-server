@@ -17,21 +17,23 @@ app.use(cors(
 ));
 
 // custom middleware for jwt verification
-// custom middleware
-const verifyToken = (req, res, next) => {
-  const token = req?.cookies?.token;
-  console.log("token in the middleware", token);
-  if (!token) {
-    return res.status(401).send("unauthorized access");
+const verifyToken = (req,res,next)=>{
+  const token = req.cookies?.tokenId;
+  // console.log(token);
+  if(!token){
+    return res.status(401).send({message:"Unauthorized"});
   }
-  jwt.verify(token, process.env.secret, (err, decoded) => {
-    if (err) {
-      return res.send(401).send("unauthorized access");
+  jwt.verify(token, process.env.secret, (err,decoded)=>{
+    if(err){
+      return res.status(401).send({message: "Unauthorized"}) 
     }
-    req.user = decoded;
+    req.user=decoded;
     next();
   })
+  // next();
 }
+
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.user}:${process.env.pass}@cluster0.lwhx9xs.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -62,7 +64,7 @@ async function run() {
       // console.log(request);
       // res.send(request);
       const token = jwt.sign(request, process.env.secret, { expiresIn: "2h" });
-      res.cookie("token", token, {
+      res.cookie("tokenId", token, {
         httpOnly: true,
         secure: true,
         sameSite: "none"
@@ -71,7 +73,7 @@ async function run() {
     })
     app.post("/logout", async (req, res) => {
       const user = req.body;
-      res.clearCookie("token").send({ msg: "cleared cookie" })
+      res.clearCookie("tokenId").send({ msg: "cleared cookie" })
     })
 
 
@@ -125,6 +127,10 @@ async function run() {
     // my services
     app.get("/myservices", verifyToken, async (req, res) => {
       // const email = req.query.email;
+      // console.log(req.cookies);
+      if(req.user?.email != req.query?.email){
+        return res.status(403).send({message: "Forbidden"})
+      }
       let query = {};
       if (req.query?.email) {
         query = {
@@ -132,10 +138,6 @@ async function run() {
         }
       }
 
-      // token verifier
-      if (req.user.email != req.query.email) {
-        return res.send(403).status("forbidden access")
-      }
 
       const result = await servicesCollection.find(query).toArray();
       res.send(result);
@@ -159,7 +161,7 @@ async function run() {
       const result = await bookingsCollection.insertOne(bookings);
       res.send(result);
     })
-    app.get("/bookings", verifyToken, async (req, res) => {
+    app.get("/bookings", async (req, res) => {
       let query = {}
       if (req.query?.usermail) {
         query = {
@@ -167,9 +169,6 @@ async function run() {
         }
       }
 
-      if(req.user.email != req.query.usermail){
-        return res.send(403).status("forbidden access")
-    }
 
       const result = await bookingsCollection.find(query).toArray();
       res.send(result)
