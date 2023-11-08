@@ -214,7 +214,10 @@ async function run() {
 
 
     // schedules
-    app.get("/schedules", async (req, res) => {
+    app.get("/schedules",verifyToken, async (req, res) => {
+      if(req.user?.email !== req.query?.hostEmail){
+        return res.status(403).send({message: "Forbidden"});
+      }
       let query = {};
       if (req.query?.hostEmail) {
         query = {
