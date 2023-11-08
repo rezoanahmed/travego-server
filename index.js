@@ -24,7 +24,7 @@ const verifyToken = (req, res, next) => {
   if (!token) {
     return res.status(401).send("unauthorized access");
   }
-  jwt.verify(token, process.env.jwt, (err, decoded) => {
+  jwt.verify(token, process.env.secret, (err, decoded) => {
     if (err) {
       return res.send(401).send("unauthorized access");
     }
@@ -159,13 +159,18 @@ async function run() {
       const result = await bookingsCollection.insertOne(bookings);
       res.send(result);
     })
-    app.get("/bookings", async (req, res) => {
+    app.get("/bookings", verifyToken, async (req, res) => {
       let query = {}
       if (req.query?.usermail) {
         query = {
           usermail: req.query.usermail
         }
       }
+
+      if(req.user.email != req.query.usermail){
+        return res.send(403).status("forbidden access")
+    }
+
       const result = await bookingsCollection.find(query).toArray();
       res.send(result)
     })
