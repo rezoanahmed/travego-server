@@ -15,6 +15,23 @@ app.use(cors(
     credentials: true,
   }
 ));
+
+// custom middleware for jwt verification
+// custom middleware
+const verifyToken = (req, res, next) => {
+  const token = req?.cookies?.token;
+  console.log("token in the middleware", token);
+  if (!token) {
+    return res.status(401).send("unauthorized access");
+  }
+  jwt.verify(token, process.env.jwt, (err, decoded) => {
+    if (err) {
+      return res.send(401).send("unauthorized access");
+    }
+    req.user = decoded;
+    next();
+  })
+}
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.user}:${process.env.pass}@cluster0.lwhx9xs.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -106,7 +123,7 @@ async function run() {
 
 
     // my services
-    app.get("/myservices", async (req, res) => {
+    app.get("/myservices", verifyToken, async (req, res) => {
       // const email = req.query.email;
       let query = {};
       if (req.query?.email) {
@@ -114,6 +131,12 @@ async function run() {
           email: req.query.email,
         }
       }
+
+      // token verifier
+      if (req.user.email != req.query.email) {
+        return res.send(403).status("forbidden access")
+      }
+
       const result = await servicesCollection.find(query).toArray();
       res.send(result);
       // console.log(email);
