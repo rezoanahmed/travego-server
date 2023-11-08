@@ -44,7 +44,7 @@ async function run() {
       const request = req.body;
       // console.log(request);
       // res.send(request);
-      const token = jwt.sign(request, "secret", { expiresIn: "2h" });
+      const token = jwt.sign(request, process.env.secret, { expiresIn: "2h" });
       res.cookie("token", token, {
         httpOnly: true,
         secure: true,
