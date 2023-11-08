@@ -1,11 +1,20 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const app = express();
 const cors = require("cors");
 const port = process.env.PORT || 3000;
 require('dotenv').config()
 
+var jwt = require('jsonwebtoken');
+
 app.use(express.json());
-app.use(cors());
+app.use(cookieParser());
+app.use(cors(
+  {
+    origin: ['http://localhost:5173'],
+    credentials: true,
+  }
+));
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.user}:${process.env.pass}@cluster0.lwhx9xs.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -29,6 +38,28 @@ async function run() {
     const destinationsCollection = client.db("TraveGo").collection("destinations");
     const reviewsCollection = client.db("TraveGo").collection("reviews");
     const bookingsCollection = client.db("TraveGo").collection("bookings");
+
+    // jwt
+    app.post("/jwt", async (req, res) => {
+      const request = req.body;
+      // console.log(request);
+      // res.send(request);
+      const token = jwt.sign(request, "secret", { expiresIn: "2h" });
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none"
+      })
+        .send({ msg: "success" })
+    })
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      res.clearCookie("token").send({ msg: "cleared cookie" })
+    })
+
+
+
+
     // console.log(servicesCollection);
     // services
     app.get("/services", async (req, res) => {
@@ -161,14 +192,14 @@ async function run() {
       res.send(result);
     })
 
-    app.patch("/schedules/:id", async(req,res)=>{
+    app.patch("/schedules/:id", async (req, res) => {
       const id = req.params.id;
       const updateRequest = req.body;
       // console.log(updateRequest);
-      const filter = {_id: new ObjectId(id)};
-      const options = {upsert: true};
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
       const updatedDoc = {
-        $set:{
+        $set: {
           status: updateRequest.status,
         }
       }
